@@ -1,0 +1,110 @@
+---
+- name: Deploy LEAP
+  hosts: "{{ leapserver }}"
+  vars:
+    pull: 1
+    project_base: /opt/LEAP
+    microservice: leap-auth-server
+    docker_network: 1to1helpnet
+    service_port: "4040:4040"
+    prod_db: leap1.1to1help.net
+    mongoRsConStr: "mongoRsConStr=mongodb://api:nvlVj9C0Lx5I5N3xUADZ6@172.31.33.229:27017,172.31.46.180:27017,172.31.47.153:27017/leapdb?replicaSet=rs0"
+    db: 10.0.1.181
+    db_name: testdb
+    db_user: user8MK
+    db_pass: PkAEjKgHRMbtGMuE
+    db_port: '27018'
+    repo: "{{ microservice }}"
+    branch: "{{ leapbranch }}"
+    git_user: abhi-ncg
+    git_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          33346336336431353761326562396238373237303531343037386439383034393662356534393239
+          3762656630393765633639663565333264653431323533350a313763653738353530383230636363
+          64333739383634366563326632323963613932626338633937643836383838653966376265396631
+          6530383039323263660a363461376431633864306634303031346135306463656563636331663436
+          30313365636561633461383966313938666461306164306465666135383737396437
+
+
+  tasks:
+    - name: Checkout {{ branch }}
+      ansible.builtin.git:
+        repo: 'https://{{ git_user }}:{{ git_pass }}@bitbucket.org/1to1helpnet/{{ repo }}.git'
+        dest: "{{ project_base }}/{{ repo }}"
+        version: "{{ branch }}"
+        force: 1
+      when: pull
+
+    - name: Create docker network
+      docker_network:
+        name: "{{ docker_network }}"
+
+    - name: Remove image 
+      shell: docker container stop "{{ microservice }}"; docker container rm "{{ microservice }}"; docker image rm     "{{ microservice }}"
+      ignore_errors: 1
+
+    - name: Build docker image
+      docker_image:
+        name: "{{ microservice }}"
+        state: present
+        source: build
+        #nocache: 0
+        build:
+          path: "{{ project_base }}/{{ microservice }}/"
+          dockerfile: "{{ project_base }}/{{ microservice }}/dockerfile"
+          pull: yes
+          rm: yes
+          network: "{{ docker_network }}"
+          
+
+    - name: Generate .env
+      blockinfile:
+        path: "{{ project_base }}/{{ microservice }}/.env"
+        block: |
+          CMS_API_KEY=TFQHOQ8D6M5E0YHSJKJH
+          CMS_URL=test.1to1help.net
+          JWT_SECRET=20ca7caa-5042-44f1-b364-f37dc73b7fe2
+          MESSAGE_QUEUE=amqp://admin:password@leap-rabbitmq-server:5672
+          MONGODB_DATABASE={{ db_name }}
+          MONGODB_PASSWORD={{ db_pass }}
+          MONGODB_SERVICE_HOST={{ db }}
+          MONGODB_SERVICE_PORT={{ db_port }}
+          MONGODB_USER={{ db_user }}
+          MONGO_SERVICE_HOST={{ db }}
+          NODE_ENV=production
+        create: 1
+        
+    - lineinfile:
+        path: "{{ project_base }}/{{ microservice }}/.env"
+        line: "{{ mongoRsConStr }}"
+        state: present
+      when: ansible_fqdn == prod_db
+      
+    - name: Re-create container
+      docker_container:
+        name: "{{ microservice }}"
+        image: "{{ microservice }}"
+        hostname: "{{ microservice }}"
+        log_driver: loki
+        log_opt:
+          loki-url: http://localhost:3100/loki/api/v1/push
+          loki-retries: 5
+          loki-batch-size: 400
+        networks:
+          - name: "{{ docker_network }}"
+            links: leap-mongo-database
+        env:
+          MONGO_SERVICE_HOST: "{{ db }}"
+        env_file: "{{ project_base }}/{{ microservice }}/.env"
+        state: present
+        #restart: 1
+        #recreate: 1
+        published_ports:
+          - "{{ service_port }}"
+        #volumes: 
+        #  - "{{ microservice }}-pnpm:/root/.pnpm-store/v3/"
+        #  - "{{ microservice }}:/app/node_modules/"
+        #  - "{{ project_base }}/{{ microservice }}:/app"
+
+    - shell: docker container start {{ microservice }}
+...

@@ -1,0 +1,33 @@
+# This is a sample build configuration for JavaScript.
+# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+definitions:
+  services:
+    mongo:
+      image: mongo
+image: "node:10.15.0"
+pipelines:
+  default:
+    - step:
+        name: Test
+        caches:
+          - node
+        script:
+          - "nodejs -v"
+          - "npm install"
+          - "npm test"
+        services:
+          - mongo
+    - step:
+        name: Docker build and push
+        script:
+         - docker build -t $OC_REGISTRY/$OC_DEV_PROJECT/$REPO_NAME:$BITBUCKET_COMMIT .
+         - docker login $OC_REGISTRY -u $OC_USERNAME -p $OC_LOGIN_TOKEN
+         - docker push $OC_REGISTRY/$OC_DEV_PROJECT/$REPO_NAME:$BITBUCKET_COMMIT
+        services:
+         - docker
+
+
+

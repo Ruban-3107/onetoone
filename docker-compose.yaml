@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  leap-auth-server:
+    build: .
+    labels:
+      NAME: "leap-auth-server"
+    hostname: "leap-auth-server"
+    container_name: "leap-auth-server"
+    networks:
+      - 1to1helpnet
+    ports:
+      - "4040:4040"
+    volumes:
+      - leap-auth-server:/app/node_modules/
+      - leap-auth-server-pnpm:/root/.pnpm-store/v3/
+volumes:
+  leap-auth-server:
+  leap-auth-server-pnpm:
+networks:
+  1to1helpnet:
+    external: true

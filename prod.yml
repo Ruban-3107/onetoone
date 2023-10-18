@@ -1,0 +1,11 @@
+---
+  all:
+    hosts:
+    children:
+      prod:
+        hosts:
+          leap1.1to1help.net:
+            ansible_host: 172.31.42.43
+        vars:
+          ansible_python_interpreter: /usr/bin/python3
+...

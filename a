@@ -1,0 +1,24 @@
+curl --location --request POST 'http://localhost:4040/account/member/verifyAuthorization' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "contactList": [
+        {
+            "contact": {
+                "productId": "PROD001",
+                "contact": "4444444444",
+                "contactType": "primaryMobileNumber",
+                "channel": "app",
+                "otp": "2463"
+            }
+        },{
+            "contact": {
+                "productId": "PROD001",
+                "contact": "pallavi.a@121help.net",
+                "contactType": "officialEmailID",
+                "channel": "app",
+                "otp": "3868"
+            }
+        }
+    ]
+}
+'

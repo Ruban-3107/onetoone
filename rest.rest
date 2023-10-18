@@ -1,0 +1,141 @@
+@host=http://localhost:5004
+
+
+POST {{host}}/account/member/createMemberAccount
+Content-Type: application/json
+
+{
+    
+    "memberId":"Member1050",
+    "sponsorId":"20220203185421THR",
+    "productId":"PROD001",
+    "accountDetails": {
+        "accountStatus": "Active",
+        "accountType": "entitled",
+        "isActivated": true
+    },
+    "memberContacts":[{"contact":{"type":"primaryMobileNumber","contact":"9591127702","isAuthorized":true,"isVerified":true}},{"contact":{"type":"primaryEmailId","contact":"gourab.c@1to1help.net","isAuthorized":true,"isVerified":true}}],
+    "accountAccessId": [
+        {"officialEmailID": "gourab.c@1to1help.net"},
+        {"primaryMobileNumber": "9591127702"}]
+
+    
+    
+}
+###
+POST {{host}}/member/generateOtp
+Content-Type: application/json
+
+{
+    "mobile":"56777",
+    
+    "otpFor":"mobile"
+}
+###
+
+POST {{host}}/member/verifyContact
+Content-Type: application/json
+
+{
+    "contactList":[
+        {"contact":
+        {
+    "productId":"PROD001",
+    "contact":"ruban.a@google.net",
+    "contactType":"primaryEmailId",
+    "channel":"app"
+    }},
+     {"contact":
+        {
+    "productId":"PROD001",
+    "contact":"clement.a@1to1help.net",
+    "contactType":"primaryEmailId",
+    "channel":"app"
+    }}
+    
+    ]
+    
+    
+}
+###
+POST {{host}}/member/verifyOtp
+Content-Type: application/json
+
+{
+    "contactList":[
+        {"contact":
+        {
+    "productId":"PROD001",
+    "contact":"9952860531",
+    "contactType":"primaryMobileNumber",
+    "channel":"app",
+    "otp":"3216"
+    }},{
+        "contact":
+        {
+    "productId":"PROD001",
+    "contact":"ruban.a@1to1help.net",
+    "contactType":"primaryEmailId",
+     "channel":"app",
+     "otp":"4060"
+    }}       
+    
+    
+    ]
+    
+    
+}
+###
+GET  {{host}}account/member/refreshtoken/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiJBY2NvdW50MDAwMiIsIm1lbWJlcklkIjoiTWVtYmVyMTQxOCIsImlhdCI6MTY0NjM3NTE5NywiZXhwIjoxNjQ4OTY3MTk3fQ.JbvPevpE0oXgRkA0edFaCsXYiHBlwqWnAucAqZ3GAh4
+Content-Type: application/json
+
+###
+POST {{host}}/acount/member/creatememberaccount 
+Content-Type: application/json
+{
+    "memberId":"Member1456",
+    "sponsorId":"20220323221203"
+
+}
+###
+POST {{host}}/account/member/createMemberAccount
+Content-Type: application/json
+
+{
+   
+    "memberId": "Member1613",
+    "sponsorId": "202203261042Tes",
+    "productId": "PROD001",
+    "showProfileBuilding":false,
+    "memberContacts": [
+        {
+            "contact": {
+                "type": "primaryMobileNumber",
+                "contact": "99999999999",
+                "isVerified": true,
+                "isAuthorized": true
+            }
+        },
+        {
+            "contact": {
+                "type": "primaryEmailId",
+                "contact": "ABC@XYZ.COM",
+                "isVerified": false,
+                "isAuthorized": false
+            }
+        }
+    ],
+    "accountAccessId": [
+        
+            {"officialEmailID": "abc@xyz.com"},
+            {"primaryMobileNumber": "9999999999"},
+            {"employeeCode": "1010"}
+        
+    ],
+    "accountDetails": {
+        "accountStatus": "Active",
+        "accountType": "entitled",
+        "isActivated": true
+    }
+}
+
